@@ -26,26 +26,26 @@ static ngx_command_t ngx_http_c_waf_commands[] = {
      NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
      ngx_http_c_waf, // The command handler
      NGX_HTTP_LOC_CONF_OFFSET,
-     offsetof(ngx_http_hello_world_loc_conf_t, output_words),
+     offsetof(ngx_http_c_waf_loc_conf_t, output_words),
      NULL},
     ngx_null_command};
 
 // Structure for the HelloWorld context
-static ngx_http_module_t ngx_http_hello_world_module_ctx = {
+static ngx_http_module_t ngx_http_c_waf_module_ctx = {
     NULL,
     NULL,
     NULL,
     NULL,
     NULL,
     NULL,
-    ngx_http_hello_world_create_loc_conf,
-    ngx_http_hello_world_merge_loc_conf};
+    ngx_http_c_waf_create_loc_conf,
+    ngx_http_c_waf_merge_loc_conf};
 
 // Structure for the HelloWorld module, the most important thing
-ngx_module_t ngx_http_hello_world_module = {
+ngx_module_t ngx_http_c_waf_module = {
     NGX_MODULE_V1,
-    &ngx_http_hello_world_module_ctx,
-    ngx_http_hello_world_commands,
+    &ngx_http_c_waf_module_ctx,
+    ngx_http_c_waf_commands,
     NGX_HTTP_MODULE,
     NULL,
     NULL,
@@ -56,11 +56,11 @@ ngx_module_t ngx_http_hello_world_module = {
     NULL,
     NGX_MODULE_V1_PADDING};
 
-static void *ngx_http_hello_world_create_loc_conf(ngx_conf_t *cf)
+static void *ngx_http_c_waf_create_loc_conf(ngx_conf_t *cf)
 {
-    ngx_http_hello_world_loc_conf_t *conf;
+    ngx_http_c_waf_loc_conf_t *conf;
 
-    conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_hello_world_loc_conf_t));
+    conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_c_waf_loc_conf_t));
     if (conf == NULL)
     {
         return NGX_CONF_ERROR;
@@ -71,10 +71,10 @@ static void *ngx_http_hello_world_create_loc_conf(ngx_conf_t *cf)
     return conf;
 }
 
-static char *ngx_http_hello_world_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
+static char *ngx_http_c_waf_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 {
-    ngx_http_hello_world_loc_conf_t *prev = parent;
-    ngx_http_hello_world_loc_conf_t *conf = child;
+    ngx_http_c_waf_loc_conf_t *prev = parent;
+    ngx_http_c_waf_loc_conf_t *conf = child;
     ngx_conf_merge_str_value(conf->output_words, prev->output_words, "Nginx");
     return NGX_CONF_OK;
 }
@@ -143,7 +143,7 @@ static int ngx_http_send_rep(ngx_http_request_t *r, const ngx_str_t *response)
  ******************************************************************************/
 static ngx_int_t ngx_http_black_filter(ngx_str_t param, ngx_str_t dict)
 {
-    if (strcasestr((char*)param.data, (char*)dict.data))
+    if (strcasestr((char *)param.data, (char *)dict.data))
     {
         return NGX_ERROR;
     }
@@ -151,7 +151,7 @@ static ngx_int_t ngx_http_black_filter(ngx_str_t param, ngx_str_t dict)
 }
 
 /****************************************************************************** 
- **函数名称: ngx_http_hello_world_handler 
+ **函数名称: ngx_http_c_waf_handler 
  **功    能: 处理http请求的业务逻辑
  **输入参数: 
  **     r: HTTP请求. 
@@ -167,12 +167,12 @@ static ngx_int_t ngx_http_black_filter(ngx_str_t param, ngx_str_t dict)
  **注意事项: 
  **作    者: # horan-geeker # 2017.09.17 # 
  ******************************************************************************/
-static ngx_int_t ngx_http_hello_world_handler(ngx_http_request_t *r)
+static ngx_int_t ngx_http_c_waf_handler(ngx_http_request_t *r)
 {
     ngx_int_t ret = 0, uri_status = 0, param_status = 0;
     ngx_str_t response = ngx_string("Hello World!");
     ngx_str_t dict;
-    ngx_http_hello_world_loc_conf_t *hlcf;
+    ngx_http_c_waf_loc_conf_t *hlcf;
 
     /* 1. 必须是GET或POST请求 */
     if (!(r->method & (NGX_HTTP_GET | NGX_HTTP_POST)))
@@ -195,7 +195,7 @@ static ngx_int_t ngx_http_hello_world_handler(ngx_http_request_t *r)
     }
 
     /* 3. 获取配置信息,验证参数 */
-    hlcf = ngx_http_get_module_loc_conf(r, ngx_http_hello_world_module);
+    hlcf = ngx_http_get_module_loc_conf(r, ngx_http_c_waf_module);
     dict = hlcf->output_words;
     if (r->uri_start)
     {
@@ -225,14 +225,14 @@ static ngx_int_t ngx_http_hello_world_handler(ngx_http_request_t *r)
     h->value = custom_header_value;
 
     /* 5. 防cc */
-    
+
     /* 7. 发送应答数据 */
     return ngx_http_send_rep(r, &response);
 }
 
 /****************************************************************************** 
- **函数名称: ngx_http_hello_world 
- **功    能: 配置项 hello_world 的解析处理回调(相当于入口函数) 
+ **函数名称: ngx_http_c_waf 
+ **功    能: 配置项 waf 的解析处理回调(相当于入口函数) 
  **输入参数: 
  **     cf: 配置信息对象 
  **     cmd: 当前正在解析的配置项解析数组 
@@ -242,11 +242,11 @@ static ngx_int_t ngx_http_hello_world_handler(ngx_http_request_t *r)
  **注意事项: 
  **作    者: # horan-geeker # 2017.09.17 # 
  ******************************************************************************/
-static char *ngx_http_hello_world(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+static char *ngx_http_c_waf(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
     ngx_http_core_loc_conf_t *clcf;
     clcf = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
-    clcf->handler = ngx_http_hello_world_handler;
+    clcf->handler = ngx_http_c_waf_handler;
     ngx_conf_set_str_slot(cf, cmd, conf);
     return NGX_CONF_OK;
 }
