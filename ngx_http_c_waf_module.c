@@ -11,16 +11,16 @@ typedef struct
     ngx_str_t output_words;
 } ngx_http_c_waf_loc_conf_t;
 
-// To process HelloWorld command arguments
+// To process c_waf command arguments
 static char *ngx_http_c_waf(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
-// Allocate memory for HelloWorld command
+// Allocate memory for c_waf command
 static void *ngx_http_c_waf_create_loc_conf(ngx_conf_t *cf);
 
-// Copy HelloWorld argument to another place
+// Copy c_waf argument to another place
 static char *ngx_http_c_waf_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
 
-// Structure for the HelloWorld command
+// Structure for the c_waf command
 static ngx_command_t ngx_http_c_waf_commands[] = {
     {ngx_string("waf"), // The command name
      NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
@@ -30,7 +30,7 @@ static ngx_command_t ngx_http_c_waf_commands[] = {
      NULL},
     ngx_null_command};
 
-// Structure for the HelloWorld context
+// Structure for the c_waf context
 static ngx_http_module_t ngx_http_c_waf_module_ctx = {
     NULL,
     NULL,
@@ -41,7 +41,7 @@ static ngx_http_module_t ngx_http_c_waf_module_ctx = {
     ngx_http_c_waf_create_loc_conf,
     ngx_http_c_waf_merge_loc_conf};
 
-// Structure for the HelloWorld module, the most important thing
+// Structure for the c_waf module, the most important thing
 ngx_module_t ngx_http_c_waf_module = {
     NGX_MODULE_V1,
     &ngx_http_c_waf_module_ctx,
